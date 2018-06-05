@@ -1,0 +1,62 @@
+﻿@using PagedList;
+@using PagedList.Mvc;
+@model IPagedList<Blog.Models.BlogPost>
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+@{
+    ViewBag.Title = "Index";
+}
+@if (User.IsInRole("Admin"))
+{
+    <ul class="pager">
+        <li>
+            @Html.ActionLink("Create New", "Create", new { @class = "withripple" })
+        </li>
+    </ul>
+}
+
+@foreach (var item in Model.Where(b =>b.Published == true))
+{
+    <section class="blog-post">
+        <div class="panel panel-default">
+            @if (item.MediaURL != null)
+            {
+                <img class="img-responsive" src="@item.MediaURL" alt="" height="1024" width="1024"  />
+            }
+            <div class="panel-body">
+                <div class="blog-post-content">
+                    @{ 
+                        var dateArray = item.Created.ToString().Split(' ');
+                    }
+                    <div class="blog-post-date pull-left">Created By: Steven Underwood on @dateArray[0] &#64; @dateArray[1] @dateArray[2]</div>
+                </div>
+                <div class="blog-post-content">
+                    <a href="@Url.Action("Details", new { Slug = item.Slug })">
+                        <h2 class="blog-post-title">@item.Title</h2>
+                    </a>
+                    <p>@item.Abstract</p>
+                    <ul class="pager">
+                        <li>
+                            <a href="@Url.Action("Details", new { Slug = item.Slug })" class="withripple">Read more</a>
+                        </li>
+                    </ul>
+                    @if (item.Updated != null)
+                    {
+                        var updateArray = item.Updated.ToString().Split(' ');
+
+                        <div classp="blog-post-date pull-left">Updated: @updateArray[0] &#64; @updateArray[1] @updateArray[2]</div>
+                    }
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <ul class="pager">
+                            <li>   @Html.ActionLink("Edit", "Edit", new { id = item.Id }) </li>
+                            <li> @Html.ActionLink("Delete", "Delete", new { id = item.Id }) </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+}
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount@Html.PagedListPager(Model, page => Url.Action("Index", new { page, searchStr = ViewBag.Search }))
+

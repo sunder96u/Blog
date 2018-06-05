@@ -1,0 +1,153 @@
+﻿@model  Blog.Models.BlogPost
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<section class="blog-post">
+    <div class="panel panel-default">
+        @if (Model.MediaURL != null)
+        {
+            <img class="img-responsive" src="@Model.MediaURL" alt="" height="1024" width="1024" />
+        }
+            <div class="panel-body">
+                <div class="blog-post-content">
+                    @{
+                        var dateArray = Model.Created.ToString().Split(' ');
+                    }
+                    <div class="blog-post-date pull-left">Created By: Steven Underwood on @dateArray[0] &#64; @dateArray[1] @dateArray[2]</div>
+                </div>
+                <div class="blog-post-content">
+                    <h1 class="blog-post-title" aligh="Center">@Model.Title</h1>
+                    <br />
+                    <div class="well">
+                        <p>@Html.Raw(Model.Body)</p>
+                    </div>
+                    @if (Model.Updated != null)
+                    {
+                        var updateArray = Model.Updated.ToString().Split(' ');
+                        
+                        <div classp="blog-post-date pull-left">Updated: @updateArray[0] &#64; @updateArray[1] @updateArray[2]</div>
+                    }
+                </div>
+            </div>
+    </div>
+</section>
+
+<section class="blog-post">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="blog-post-content">
+                <h2>Comments:</h2>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="blog-post">
+    @*Here is where I am going to want to put my loop for all the comments*@
+    @foreach (var Item in Model.Comments.OrderByDescending(p => p.Created))
+    {
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="blog-post-content">
+
+                    @{
+                        var comdateArray = Item.Created.ToString().Split(' ');
+                    }
+                    <span class="blog-post-date pull-left">Created By: @Item.Author.DisplayName</span>
+                    <span class="blog-post-date pull-right"> @comdateArray[0] &#64; @comdateArray[1] @comdateArray[2]</span>
+                    <br />
+                    <br />
+                    <div class="well">
+                        <p>@Html.Raw(Item.Body)</p>
+                    </div>
+                    @if (User.IsInRole("Moderator") || User.IsInRole("Admin"))
+                    {
+                        <ul class="pager">
+                            <li>   @Html.ActionLink("Edit", "Edit", "Comments", new { id = Item.Id }, null) </li>
+                            <li> @Html.ActionLink("Delete", "Delete", "Comments", new { id = Item.Id }, null) </li>
+                        </ul>
+                    }
+                    @if (Item.Updated != null)
+                    {
+                        var updateddatearray = Item.Updated.ToString().Split(' ');
+
+                        <span class="blog-post-date pull-left">Update Reason: @Item.UpdateReason </span>
+                        <span class="blog-post-date pull-right"> @updateddatearray[0] &#64; @updateddatearray[1] @updateddatearray[2] </span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+</section>
+<section class="blog-post">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="blog-post-content">
+                <h3>Create a Comment:</h3>
+                @using (Html.BeginForm("Create", "Comments", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("PostId", Model.Id)
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            @Html.TextArea("Body", "", new { @class = "form-control", @value = "" })
+                            @Html.ValidationMessage("Body", "", new { @class = "text-danger" })
+                            @*<textarea placeholder="Enter Text Here!"></textarea>*@
+                        </div>
+                    </div>
+                    <br />
+                    <div class="form-group">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                        <div class="col-md-offset-9 col-md-3">
+                            <ul class="pager">
+                                <li>
+                                    <input type="submit" value="Create" class="btn btn-default" />
+                                </li>
+                            </ul>
+                        </div>
+                        }
+                        else
+                        {
+                            <div class="col-md-offset-6 col-md-6">
+                                <ul class="form-group">
+                                    <li>
+                                @Html.ActionLink("You must be logged in to add comments", "Login", "Account")
+                                        </li>
+                                    </ul>
+                            </div>
+                        }
+                    </div>
+                    <br />
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<nav>
+    <ul class="pager">
+        <li><a class="withripple" href="Index">Back to Posts</a></li>
+        @if (User.IsInRole("Admin"))
+        {
+            <li>@Html.ActionLink("Edit", "Edit", new { id = Model.Id }, new { @class = "withripple" })</li>
+            <li>@Html.ActionLink("Delete", "Delete", new { id = Model.Id }, new { @class = "withripple" })</li>
+        }
+    </ul>
+</nav>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/tinymce/tinymce.min.js"></script>
+    <script src="~/Scripts/tinymce/jquery.tinymce.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            tinymce.init({
+                selector: '#Body'
+            });
+        });
+    </script>
+
+}
+

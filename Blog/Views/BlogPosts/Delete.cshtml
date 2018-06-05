@@ -1,0 +1,48 @@
+﻿@model Blog.Models.BlogPost
+
+@{
+    ViewBag.Title = "Delete";
+}
+
+
+
+<h1>Are you sure you want to delete this?</h1>
+<div>
+
+    <hr />
+    <section class="blog-post">
+        <div class="panel panel-default">
+            @if (Model.MediaURL != null)
+            {
+                <img class="img-responsive" src="@Model.MediaURL" alt="" height="1024" width="1024" />
+            }
+            <div class="panel-body">
+                <div class="blog-post">
+                    <div class="blog-post-date align-center">Created By: Steven Underwood on @Model.Created</div>
+                </div>
+                <div class="blog-post-content">
+                    <h1 class="blog-post-title">@Model.Title</h1>
+                    <br />
+                    <div class="well">
+                        <p>@Html.Raw(Model.Body)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" />
+        </div>
+        <ul class="pager">
+            <li>
+                @Html.ActionLink("Back to Posts", "Index", new { @class = "withripple" })
+            </li>
+        </ul>
+
+    }
+</div>
